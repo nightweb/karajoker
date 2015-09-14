@@ -17,28 +17,12 @@ module Job
       logger.info "<< Get best songs at #{year} >>"
       response = Service::SongSearch.new.call(year, limit)
 
-      songs = filter_repeated(response.songs)
-      songs = filter_already_indexed(songs)
+      songs = filter_already_indexed(response.songs)
 
       logger.info "<< Find & index karaokes for #{songs.size} songs >>"
       response = Service::KaraokeCreate.new.call(songs)
 
       logger.info "#{response.count} new karaokes for #{year} year!"
-    end
-
-    def filter_repeated(songs)
-      titles = []
-      result = songs.select do |song|
-        if titles.include?(song.title)
-          false
-        else
-          titles << song.title
-          true
-        end
-      end
-      filtered = songs.size - result.size
-      logger.info "<< Filter #{filtered} repeated songs of #{songs.size} >>"
-      result
     end
 
     def filter_already_indexed(songs)
